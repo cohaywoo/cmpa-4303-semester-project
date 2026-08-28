@@ -3,32 +3,225 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CMPA 4303 Semester Project</title>
+    <title>BlockCraft Companion</title>
     <style>
+      :root {
+        --bg: #101b1b;
+        --panel: #18312a;
+        --panel-2: #244d3b;
+        --grass: #6ecb63;
+        --gold: #f4d35e;
+        --text: #ecfdf5;
+        --muted: #c9e8d9;
+        --shadow: rgba(0, 0, 0, 0.25);
+      }
+
+      * { box-sizing: border-box; }
+
       body {
-        font-family: Arial, sans-serif;
-        margin: 2rem;
-        background: #f4f7fb;
-        color: #1f2937;
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(180deg, #0d1717 0%, #132b2a 50%, #101b1b 100%);
+        color: var(--text);
       }
-      .card {
-        max-width: 720px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+      .page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 20px;
       }
+
+      .container {
+        width: min(980px, 100%);
+        background: rgba(24, 49, 42, 0.9);
+        border: 2px solid rgba(110, 203, 99, 0.5);
+        border-radius: 20px;
+        box-shadow: 0 18px 40px var(--shadow);
+        overflow: hidden;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.3fr 0.9fr;
+        gap: 24px;
+        padding: 32px;
+      }
+
+      .badge {
+        display: inline-block;
+        background: rgba(244, 211, 94, 0.15);
+        color: var(--gold);
+        border: 1px solid rgba(244, 211, 94, 0.4);
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+
       h1 {
-        color: #111827;
+        margin: 18px 0 14px;
+        font-size: clamp(2.5rem, 4vw, 4rem);
+        line-height: 1.05;
+      }
+
+      p {
+        color: var(--muted);
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+
+      .actions {
+        display: flex;
+        gap: 14px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+      }
+
+      .button {
+        display: inline-block;
+        padding: 12px 18px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .button.primary {
+        background: var(--grass);
+        color: #102312;
+      }
+
+      .button.secondary {
+        background: transparent;
+        border: 1px solid rgba(236, 253, 245, 0.4);
+        color: var(--text);
+      }
+
+      .card {
+        background: linear-gradient(180deg, var(--panel-2), rgba(36, 77, 59, 0.85));
+        border: 1px solid rgba(110, 203, 99, 0.4);
+        border-radius: 18px;
+        padding: 20px;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .stat {
+        background: rgba(16, 27, 27, 0.6);
+        border-radius: 12px;
+        padding: 16px 12px;
+        text-align: center;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 1.6rem;
+        color: var(--gold);
+      }
+
+      .stat span {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        padding: 0 32px 32px;
+      }
+
+      .feature {
+        background: rgba(16, 27, 27, 0.55);
+        border-radius: 14px;
+        padding: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .feature h3 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: var(--gold);
+      }
+
+      @media (max-width: 760px) {
+        .hero,
+        .feature-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding: 24px 20px;
+        }
+
+        .feature-grid {
+          padding: 0 20px 24px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="card">
-      <h1>CMPA 4303 Semester Project</h1>
-      <p>This is the starter page for the semester project in CMPA 4303.</p>
-      <p>Use this repository to build the project, commit changes, and publish updates to GitHub.</p>
+    <div class="page">
+      <div class="container">
+        <div class="hero">
+          <div>
+            <span class="badge">CMPA 4303</span>
+            <h1>BlockCraft Companion</h1>
+            <p>
+              A sleek planning tool built for builders, miners, and adventurers who need a simple place to organize crafting ideas,
+              inventory thoughts, and creative project goals.
+            </p>
+            <div class="actions">
+              <a class="button primary" href="#features">Explore Features</a>
+              <a class="button secondary" href="#overview">View Overview</a>
+            </div>
+          </div>
+
+          <div class="card" id="overview">
+            <h2>Project Snapshot</h2>
+            <div class="stats">
+              <div class="stat">
+                <strong>24</strong>
+                <span>plans</span>
+              </div>
+              <div class="stat">
+                <strong>8</strong>
+                <span>biomes</span>
+              </div>
+              <div class="stat">
+                <strong>3</strong>
+                <span>tools</span>
+              </div>
+            </div>
+            <p>
+              This starter page is designed to support a future build tracker and companion dashboard for a Minecraft-inspired creative project.
+            </p>
+          </div>
+        </div>
+
+        <div class="feature-grid" id="features">
+          <div class="feature">
+            <h3>Build Planner</h3>
+            <p>Organize structure ideas, resource lists, and step-by-step build progress for your next large creation.</p>
+          </div>
+          <div class="feature">
+            <h3>Resource Tracker</h3>
+            <p>Track the blocks, tools, and materials needed to complete each project with fewer last-minute surprises.</p>
+          </div>
+          <div class="feature">
+            <h3>Creative Hub</h3>
+            <p>Capture inspiration, sketch layouts, and note design ideas in one easy-to-use workspace.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>

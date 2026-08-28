@@ -1,3 +1,3 @@
-# CMPA 4303 Semester Project
+# BlockCraft Companion
 
-This project is the semester project for CMPA 4303. It serves as a starter repository for building and testing front-end web work throughout the course.
+BlockCraft Companion is a starter web project for a Minecraft-inspired resource and planning tool for players who want to track builds, materials, and ideas in one place.
