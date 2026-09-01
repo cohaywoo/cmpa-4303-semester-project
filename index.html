@@ -16,6 +16,17 @@
         --shadow: rgba(0, 0, 0, 0.25);
       }
 
+      [data-theme="light"] {
+        --bg: #f5f7f5;
+        --panel: #e8f0ed;
+        --panel-2: #d9e8e0;
+        --grass: #2d8659;
+        --gold: #d4a500;
+        --text: #1a3a30;
+        --muted: #4a6d60;
+        --shadow: rgba(0, 0, 0, 0.1);
+      }
+
       * { box-sizing: border-box; }
 
       body {
@@ -23,6 +34,34 @@
         font-family: Arial, Helvetica, sans-serif;
         background: linear-gradient(180deg, #0d1717 0%, #132b2a 50%, #101b1b 100%);
         color: var(--text);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      [data-theme="light"] body {
+        background: linear-gradient(180deg, #f0f5f4 0%, #e8f0ed 50%, #f5f7f5 100%);
+      }
+
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--panel);
+        border: 2px solid rgba(110, 203, 99, 0.5);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.1);
+        border-color: rgba(110, 203, 99, 0.8);
       }
 
       .page {
@@ -40,6 +79,12 @@
         border-radius: 20px;
         box-shadow: 0 18px 40px var(--shadow);
         overflow: hidden;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+
+      [data-theme="light"] .container {
+        background: rgba(232, 240, 237, 0.95);
+        border-color: rgba(45, 134, 89, 0.5);
       }
 
       .hero {
@@ -98,6 +143,11 @@
         background: transparent;
         border: 1px solid rgba(236, 253, 245, 0.4);
         color: var(--text);
+        transition: all 0.3s ease;
+      }
+
+      [data-theme="light"] .button.secondary {
+        border-color: rgba(26, 58, 48, 0.3);
       }
 
       .card {
@@ -105,6 +155,12 @@
         border: 1px solid rgba(110, 203, 99, 0.4);
         border-radius: 18px;
         padding: 20px;
+        transition: background 0.3s ease, border-color 0.3s ease;
+      }
+
+      [data-theme="light"] .card {
+        background: linear-gradient(180deg, var(--panel-2), rgba(217, 232, 224, 0.95));
+        border-color: rgba(45, 134, 89, 0.3);
       }
 
       .stats {
@@ -144,6 +200,12 @@
         border-radius: 14px;
         padding: 18px;
         border: 1px solid rgba(255,255,255,0.08);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+      }
+
+      [data-theme="light"] .feature {
+        background: rgba(217, 232, 224, 0.6);
+        border-color: rgba(45, 134, 89, 0.15);
       }
 
       .feature h3 {
@@ -169,6 +231,7 @@
     </style>
   </head>
   <body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
     <div class="page">
       <div class="container">
         <div class="hero">
@@ -223,5 +286,34 @@
         </div>
       </div>
     </div>
+    <script>
+      // Theme toggle functionality
+      const themeToggle = document.getElementById('themeToggle');
+      const html = document.documentElement;
+
+      // Check for saved theme preference or system preference
+      const getInitialTheme = () => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+          return savedTheme;
+        }
+        // Check system preference
+        return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      };
+
+      // Set initial theme
+      const currentTheme = getInitialTheme();
+      html.setAttribute('data-theme', currentTheme);
+      themeToggle.textContent = currentTheme === 'light' ? '🌙' : '☀️';
+
+      // Handle theme toggle
+      themeToggle.addEventListener('click', () => {
+        const theme = html.getAttribute('data-theme');
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
+      });
+    </script>
   </body>
 </html>
