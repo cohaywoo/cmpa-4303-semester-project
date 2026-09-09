@@ -319,6 +319,7 @@
 
       .screenshot-label { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 0.8rem; }
       .screenshot-label input { min-width: 0; max-width: 190px; padding: 7px; font-size: 0.75rem; }
+      .share-status { display: inline-block; color: var(--grass); font-size: 0.78rem; }
 
       .delete-build {
         padding: 9px 10px;
@@ -579,6 +580,8 @@
                 <select id="buildSelect" aria-label="Choose a saved build"></select>
                 <button class="delete-build" id="deleteBuild" type="button">Delete This Build</button>
                 <label class="screenshot-label">Add screenshots <input id="buildScreenshot" type="file" accept="image/*" multiple /></label>
+                <button class="button secondary" id="shareBuild" type="button">Share This Build</button>
+                <span class="share-status" id="shareStatus" role="status" aria-live="polite"></span>
               </div>
             </div>
           </div>
@@ -878,6 +881,25 @@
           renderBiomeGallery();
           event.target.value = '';
         });
+      });
+
+      document.getElementById('shareBuild').addEventListener('click', async () => {
+        const materials = Object.entries(buildBlocks).map(([blockName, amount]) => `${blockName}: ${amount}`).join(', ') || 'No materials added yet';
+        const shareText = `${activeBuildName}\nBiome: ${selectedBiome || 'Not selected'}\nMaterials: ${materials}`;
+        const shareData = { title: `${activeBuildName} | BlockCraft Companion`, text: shareText, url: 'https://cohaywoo.github.io/cmpa-4303-semester-project/' };
+        try {
+          if (navigator.share) {
+            await navigator.share(shareData);
+            document.getElementById('shareStatus').textContent = 'Build shared.';
+          } else if (navigator.clipboard) {
+            await navigator.clipboard.writeText(`${shareText}\n${shareData.url}`);
+            document.getElementById('shareStatus').textContent = 'Build details copied.';
+          } else {
+            document.getElementById('shareStatus').textContent = 'Sharing is not available here.';
+          }
+        } catch (error) {
+          if (error.name !== 'AbortError') document.getElementById('shareStatus').textContent = 'Sharing was canceled.';
+        }
       });
 
       document.getElementById('biomeToggle').addEventListener('click', () => {
