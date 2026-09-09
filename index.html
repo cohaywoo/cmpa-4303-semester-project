@@ -253,6 +253,28 @@
       .hub-heading h2 { margin: 0; }
       .hub-heading p { margin: 6px 0 0; font-size: 0.92rem; }
 
+      .build-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-top: 16px;
+      }
+
+      .build-controls input,
+      .build-controls select {
+        min-width: 180px;
+        padding: 10px;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        font: inherit;
+      }
+
+      .build-controls input:focus,
+      .build-controls select:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
+
       .hub-grid {
         display: grid;
         grid-template-columns: 1.1fr 0.9fr;
@@ -492,6 +514,11 @@
             <div>
               <h2 id="hub-title">My Build Hub</h2>
               <p>Choose a block to add it to your personal build list.</p>
+              <div class="build-controls">
+                <input id="newBuildName" type="text" placeholder="Name your build" maxlength="40" aria-label="Name your build" />
+                <button class="button primary" id="createBuild" type="button">Create Build</button>
+                <select id="buildSelect" aria-label="Choose a saved build"></select>
+              </div>
             </div>
           </div>
           <div class="hub-grid">
@@ -550,7 +577,13 @@
 
       const savedBlocks = document.getElementById('savedBlocks');
       const blockStorageKey = 'blockcraft-build-hub';
-      let buildBlocks = JSON.parse(localStorage.getItem(blockStorageKey) || '{}');
+      const projectsStorageKey = 'blockcraft-build-projects';
+      const savedBuilds = JSON.parse(localStorage.getItem(projectsStorageKey) || '{}');
+      const oldBlocks = JSON.parse(localStorage.getItem(blockStorageKey) || '{}');
+      const buildProjects = Object.keys(savedBuilds).length ? savedBuilds : { 'My First Build': oldBlocks };
+      let activeBuildName = Object.keys(buildProjects)[0];
+      let buildBlocks = buildProjects[activeBuildName];
+      const buildSelect = document.getElementById('buildSelect');
 
       const blockSwatches = {
         'Spruce Log': 'swatch-spruce',
@@ -647,6 +680,8 @@
 
       function renderBuildBlocks() {
         savedBlocks.innerHTML = '';
+        buildProjects[activeBuildName] = buildBlocks;
+        localStorage.setItem(projectsStorageKey, JSON.stringify(buildProjects));
         const blockNames = Object.keys(buildBlocks);
         if (!blockNames.length) {
           savedBlocks.innerHTML = '<p class="saved-empty">No blocks saved yet. Choose one to get started.</p>';
@@ -658,7 +693,11 @@
           item.innerHTML = `<img class="block-image" src="${textureBase}${getBlockTexture(blockName)}.png" alt="${blockName}" /><span>${blockName}</span><span class="quantity-control"><button type="button" data-action="decrease" data-block="${blockName}" aria-label="Remove one ${blockName}">−</button><input class="quantity-input" type="number" min="1" step="1" value="${buildBlocks[blockName]}" data-block="${blockName}" aria-label="Amount of ${blockName}" /><button type="button" data-action="increase" data-block="${blockName}" aria-label="Add one ${blockName}">+</button></span>`;
           savedBlocks.appendChild(item);
         });
-        localStorage.setItem(blockStorageKey, JSON.stringify(buildBlocks));
+      }
+
+      function renderBuildChoices() {
+        buildSelect.innerHTML = Object.keys(buildProjects).map((buildName) => `<option value="${buildName}">${buildName}</option>`).join('');
+        buildSelect.value = activeBuildName;
       }
 
       document.getElementById('blockPalette').addEventListener('click', (event) => {
@@ -699,6 +738,24 @@
         renderBuildBlocks();
       });
 
+      document.getElementById('createBuild').addEventListener('click', () => {
+        const nameInput = document.getElementById('newBuildName');
+        const buildName = nameInput.value.trim();
+        if (!buildName) return;
+        buildProjects[buildName] = {};
+        activeBuildName = buildName;
+        buildBlocks = buildProjects[activeBuildName];
+        nameInput.value = '';
+        renderBuildChoices();
+        renderBuildBlocks();
+      });
+
+      buildSelect.addEventListener('change', () => {
+        activeBuildName = buildSelect.value;
+        buildBlocks = buildProjects[activeBuildName];
+        renderBuildBlocks();
+      });
+
       const materialsToggle = document.getElementById('materialsToggle');
       const buildHub = document.getElementById('build-hub');
       materialsToggle.addEventListener('click', () => {
@@ -710,6 +767,7 @@
       });
 
       renderPalette('all');
+      renderBuildChoices();
       renderBuildBlocks();
     </script>
   </body>
