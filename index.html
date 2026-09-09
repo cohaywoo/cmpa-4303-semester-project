@@ -29,6 +29,12 @@
 
       * { box-sizing: border-box; }
 
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--grass); }
+      * { scrollbar-color: rgba(255, 255, 255, 0.22) rgba(0, 0, 0, 0.2); scrollbar-width: thin; }
+
       body {
         margin: 0;
         font-family: Arial, Helvetica, sans-serif;
@@ -74,10 +80,12 @@
 
       .container {
         width: min(980px, 100%);
-        background: rgba(24, 49, 42, 0.9);
-        border: 2px solid rgba(110, 203, 99, 0.5);
+        background: rgba(24, 49, 42, 0.68);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 20px;
-        box-shadow: 0 18px 40px var(--shadow);
+        box-shadow: 0 8px 32px var(--shadow);
         overflow: hidden;
         transition: background-color 0.3s ease, border-color 0.3s ease;
       }
@@ -151,10 +159,13 @@
       }
 
       .card {
-        background: linear-gradient(180deg, var(--panel-2), rgba(36, 77, 59, 0.85));
-        border: 1px solid rgba(110, 203, 99, 0.4);
+        background: rgba(36, 77, 59, 0.64);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 18px;
         padding: 20px;
+        box-shadow: 0 8px 32px var(--shadow);
         transition: background 0.3s ease, border-color 0.3s ease;
       }
 
@@ -349,8 +360,12 @@
 
       .hub-panel {
         padding: 18px;
-        background: var(--panel);
+        background: rgba(24, 49, 42, 0.58);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
+        box-shadow: 0 8px 32px var(--shadow);
       }
 
       .hub-panel h3 { margin: 0 0 14px; font-size: 1rem; }
@@ -365,21 +380,24 @@
       .block-search:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
 
       .category-button {
-        padding: 7px 10px;
+        padding: 6px 14px;
         color: var(--muted);
-        background: transparent;
-        border: 1px solid rgba(236, 253, 245, 0.25);
-        border-radius: 7px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
         cursor: pointer;
         font: inherit;
-        font-size: 0.78rem;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
       }
 
-      .category-button:hover,
+      .category-button:hover { background: rgba(255, 255, 255, 0.12); }
       .category-button.active {
-        color: var(--ink);
+        color: #052e16;
         background: var(--grass);
-        border-color: var(--grass);
+        border-color: var(--lime);
+        box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+        font-weight: 600;
       }
 
       .block-palette {
@@ -395,17 +413,18 @@
         min-width: 0;
         padding: 10px;
         color: var(--text);
-        background: var(--panel-2);
-        border: 1px solid rgba(110, 203, 99, 0.3);
-        border-radius: 10px;
+        background: linear-gradient(145deg, rgba(30, 58, 41, 0.92), rgba(20, 40, 28, 0.92));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
         cursor: pointer;
         font: inherit;
         font-size: 0.82rem;
         text-align: left;
-        transition: transform 0.2s ease, border-color 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      .block-option:hover { border-color: var(--grass); transform: translateY(-2px); }
+      .block-option:hover { border-color: #4ade80; transform: translateY(-4px); box-shadow: 0 6px 20px rgba(74, 222, 128, 0.15), inset 0 1px rgba(255,255,255,0.08); }
+      .block-option:active { transform: translateY(-1px); }
 
       .block-swatch {
         flex: 0 0 23px;
