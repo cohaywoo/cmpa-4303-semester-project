@@ -158,6 +158,17 @@
         transition: background 0.3s ease, border-color 0.3s ease;
       }
 
+      #overview,
+      #features {
+        scroll-margin-top: 24px;
+      }
+
+      #overview:target,
+      #features:target {
+        outline: 3px solid var(--gold);
+        outline-offset: 6px;
+      }
+
       [data-theme="light"] .card {
         background: linear-gradient(180deg, var(--panel-2), rgba(217, 232, 224, 0.95));
         border-color: rgba(45, 134, 89, 0.3);
@@ -200,7 +211,7 @@
         border-radius: 14px;
         padding: 18px;
         border: 1px solid rgba(255,255,255,0.08);
-        transition: background-color 0.3s ease, border-color 0.3s ease;
+        transition: background-color 0.3s ease, border-color 0.3s ease, outline 0.3s ease;
       }
 
       [data-theme="light"] .feature {
@@ -213,6 +224,178 @@
         margin-bottom: 10px;
         color: var(--gold);
       }
+
+      .hub {
+        margin: 0 32px 32px;
+        padding: 24px;
+        background: rgba(16, 27, 27, 0.45);
+        border: 1px solid rgba(110, 203, 99, 0.35);
+        border-radius: 18px;
+      }
+
+      .hub[hidden] { display: none; }
+
+      .hub-toggle { margin-top: 8px; padding: 9px 12px; font-size: 0.82rem; }
+
+      [data-theme="light"] .hub {
+        background: rgba(217, 232, 224, 0.55);
+        border-color: rgba(45, 134, 89, 0.25);
+      }
+
+      .hub-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .hub-heading h2 { margin: 0; }
+      .hub-heading p { margin: 6px 0 0; font-size: 0.92rem; }
+
+      .hub-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 18px;
+      }
+
+      .hub-panel {
+        padding: 18px;
+        background: var(--panel);
+        border-radius: 12px;
+      }
+
+      .hub-panel h3 { margin: 0 0 14px; font-size: 1rem; }
+
+      .category-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 14px;
+      }
+
+      .category-button {
+        padding: 7px 10px;
+        color: var(--muted);
+        background: transparent;
+        border: 1px solid rgba(236, 253, 245, 0.25);
+        border-radius: 7px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.78rem;
+      }
+
+      .category-button:hover,
+      .category-button.active {
+        color: var(--ink);
+        background: var(--grass);
+        border-color: var(--grass);
+      }
+
+      .block-palette {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .block-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        padding: 10px;
+        color: var(--text);
+        background: var(--panel-2);
+        border: 1px solid rgba(110, 203, 99, 0.3);
+        border-radius: 10px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.82rem;
+        text-align: left;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+      }
+
+      .block-option:hover { border-color: var(--grass); transform: translateY(-2px); }
+
+      .block-swatch {
+        flex: 0 0 23px;
+        width: 23px;
+        height: 23px;
+        border: 2px solid rgba(255,255,255,0.35);
+        border-radius: 5px;
+      }
+
+      .block-image {
+        flex: 0 0 30px;
+        width: 30px;
+        height: 30px;
+        object-fit: contain;
+        image-rendering: pixelated;
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 5px;
+      }
+
+      .swatch-spruce { background: #76533b; }
+      .swatch-stone { background: #7f8784; }
+      .swatch-glass { background: #8bd6d8; }
+      .swatch-moss { background: #5e8c4b; }
+      .swatch-lantern { background: #f4b74b; }
+      .swatch-brick { background: #ad5543; }
+
+      .saved-blocks { display: grid; gap: 8px; min-height: 80px; }
+
+      .saved-empty {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .saved-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 9px 10px;
+        background: var(--panel-2);
+        border-radius: 8px;
+        font-size: 0.88rem;
+      }
+
+      .saved-item span:nth-child(2) { flex: 1; }
+
+      .quantity-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--muted);
+        font-family: monospace;
+      }
+
+      .quantity-control button {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        color: var(--text);
+        background: transparent;
+        border: 1px solid rgba(236, 253, 245, 0.3);
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .quantity-control button:hover { border-color: var(--grass); }
+
+      .clear-button {
+        margin-top: 14px;
+        padding: 7px 0;
+        color: var(--muted);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.8rem;
+        text-decoration: underline;
+      }
+
+      .clear-button:hover { color: var(--text); }
 
       @media (max-width: 760px) {
         .hero,
@@ -227,6 +410,11 @@
         .feature-grid {
           padding: 0 20px 24px;
         }
+
+        .hub { margin: 0 20px 24px; padding: 18px; }
+        .hub-heading { display: block; }
+        .hub-grid { grid-template-columns: 1fr; }
+        .block-palette { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
     </style>
   </head>
@@ -243,8 +431,8 @@
               inventory thoughts, and creative project goals.
             </p>
             <div class="actions">
-              <a class="button primary" href="#features">Explore Features</a>
-              <a class="button secondary" href="#overview">View Overview</a>
+              <a class="button primary" href="#features">See Features</a>
+              <a class="button secondary" href="#overview">Project Overview</a>
             </div>
           </div>
 
@@ -265,25 +453,57 @@
               </div>
             </div>
             <p>
-              This starter page is designed to support a future build tracker and companion dashboard for a Minecraft-inspired creative project.
+              Use this page to plan builds, track resources, and organize creative ideas in one place.
             </p>
           </div>
         </div>
 
         <div class="feature-grid" id="features">
           <div class="feature">
-            <h3>Build Planner</h3>
-            <p>Organize structure ideas, resource lists, and step-by-step build progress for your next large creation.</p>
+            <h3>Plan Builds</h3>
+            <p>Write down your build idea and break it into simple steps.</p>
           </div>
           <div class="feature">
-            <h3>Resource Tracker</h3>
-            <p>Track the blocks, tools, and materials needed to complete each project with fewer last-minute surprises.</p>
+            <h3>Track Materials</h3>
+            <p>Keep a list of the blocks, tools, and materials you need.</p>
+            <button class="button primary hub-toggle" id="materialsToggle" type="button" aria-controls="build-hub" aria-expanded="false">Open Build Hub</button>
           </div>
           <div class="feature">
-            <h3>Creative Hub</h3>
-            <p>Capture inspiration, sketch layouts, and note design ideas in one easy-to-use workspace.</p>
+            <h3>Save Ideas</h3>
+            <p>Keep inspiration, layouts, and design notes together.</p>
           </div>
         </div>
+
+        <section class="hub" id="build-hub" aria-labelledby="hub-title" hidden>
+          <div class="hub-heading">
+            <div>
+              <h2 id="hub-title">My Build Hub</h2>
+              <p>Choose a block to add it to your personal build list.</p>
+            </div>
+          </div>
+          <div class="hub-grid">
+            <div class="hub-panel">
+              <h3>Choose blocks</h3>
+              <div class="category-list" id="categoryList" aria-label="Block categories">
+                <button class="category-button active" type="button" data-category="all">All</button>
+                <button class="category-button" type="button" data-category="terrain">Natural &amp; Terrain</button>
+                <button class="category-button" type="button" data-category="ores">Ores &amp; Minerals</button>
+                <button class="category-button" type="button" data-category="wood">Wood &amp; Vegetation</button>
+                <button class="category-button" type="button" data-category="building">Building &amp; Decor</button>
+                <button class="category-button" type="button" data-category="utility">Utility</button>
+                <button class="category-button" type="button" data-category="redstone">Redstone</button>
+                <button class="category-button" type="button" data-category="dimensions">Nether &amp; End</button>
+                <button class="category-button" type="button" data-category="special">Special</button>
+              </div>
+              <div class="block-palette" id="blockPalette"></div>
+            </div>
+            <div class="hub-panel">
+              <h3>My saved blocks</h3>
+              <div class="saved-blocks" id="savedBlocks" aria-live="polite"></div>
+              <button class="clear-button" id="clearBlocks" type="button">Clear my list</button>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
     <script>
@@ -314,6 +534,162 @@
         localStorage.setItem('theme', newTheme);
         themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
       });
+
+      const savedBlocks = document.getElementById('savedBlocks');
+      const blockStorageKey = 'blockcraft-build-hub';
+      let buildBlocks = JSON.parse(localStorage.getItem(blockStorageKey) || '{}');
+
+      const blockSwatches = {
+        'Spruce Log': 'swatch-spruce',
+        Stone: 'swatch-stone',
+        Glass: 'swatch-glass',
+        'Moss Block': 'swatch-moss',
+        Lantern: 'swatch-lantern',
+        Brick: 'swatch-brick',
+        Leaves: 'swatch-moss',
+        Dirt: 'swatch-stone',
+        Glowstone: 'swatch-lantern'
+      };
+
+      const blockCatalog = [
+        ['terrain', 'Grass Block', 'grass_block'], ['terrain', 'Dirt', 'dirt'], ['terrain', 'Coarse Dirt', 'coarse_dirt'], ['terrain', 'Podzol', 'podzol_side'], ['terrain', 'Rooted Dirt', 'rooted_dirt'], ['terrain', 'Mud', 'mud'], ['terrain', 'Mycelium', 'mycelium_side'], ['terrain', 'Stone', 'stone'], ['terrain', 'Cobblestone', 'cobblestone'], ['terrain', 'Granite', 'granite'], ['terrain', 'Diorite', 'diorite'], ['terrain', 'Andesite', 'andesite'], ['terrain', 'Deepslate', 'deepslate'], ['terrain', 'Tuff', 'tuff'], ['terrain', 'Calcite', 'calcite'], ['terrain', 'Dripstone Block', 'dripstone_block'], ['terrain', 'Sand', 'sand'], ['terrain', 'Red Sand', 'red_sand'], ['terrain', 'Gravel', 'gravel'], ['terrain', 'Clay', 'clay'], ['terrain', 'Ice', 'ice'], ['terrain', 'Packed Ice', 'packed_ice'], ['terrain', 'Blue Ice', 'blue_ice'], ['terrain', 'Snow Block', 'snow_block'],
+        ['ores', 'Coal Ore', 'coal_ore'], ['ores', 'Iron Ore', 'iron_ore'], ['ores', 'Copper Ore', 'copper_ore'], ['ores', 'Gold Ore', 'gold_ore'], ['ores', 'Redstone Ore', 'redstone_ore'], ['ores', 'Lapis Lazuli Ore', 'lapis_ore'], ['ores', 'Diamond Ore', 'diamond_ore'], ['ores', 'Emerald Ore', 'emerald_ore'], ['ores', 'Nether Quartz Ore', 'nether_quartz_ore'], ['ores', 'Ancient Debris', 'ancient_debris_side'], ['ores', 'Block of Coal', 'coal_block'], ['ores', 'Block of Iron', 'iron_block'], ['ores', 'Block of Copper', 'copper_block'], ['ores', 'Block of Gold', 'gold_block'], ['ores', 'Block of Redstone', 'redstone_block'], ['ores', 'Block of Lapis Lazuli', 'lapis_block'], ['ores', 'Block of Diamond', 'diamond_block'], ['ores', 'Block of Emerald', 'emerald_block'], ['ores', 'Block of Netherite', 'netherite_block'],
+        ['wood', 'Oak Log', 'oak_log'], ['wood', 'Spruce Log', 'spruce_log'], ['wood', 'Birch Log', 'birch_log'], ['wood', 'Jungle Log', 'jungle_log'], ['wood', 'Acacia Log', 'acacia_log'], ['wood', 'Dark Oak Log', 'dark_oak_log'], ['wood', 'Mangrove Log', 'mangrove_log'], ['wood', 'Cherry Log', 'cherry_log'], ['wood', 'Bamboo Block', 'bamboo_block'], ['wood', 'Crimson Stem', 'crimson_stem'], ['wood', 'Warped Stem', 'warped_stem'], ['wood', 'Oak Planks', 'oak_planks'], ['wood', 'Spruce Planks', 'spruce_planks'], ['wood', 'Birch Planks', 'birch_planks'], ['wood', 'Leaves', 'oak_leaves'], ['wood', 'Moss Block', 'moss_block'], ['wood', 'Azalea', 'azalea'], ['wood', 'Bamboo', 'bamboo'], ['wood', 'Cactus', 'cactus'], ['wood', 'Sugar Cane', 'sugar_cane'],
+        ['building', 'Bricks', 'bricks'], ['building', 'Mud Bricks', 'mud_bricks'], ['building', 'Stone Bricks', 'stone_bricks'], ['building', 'Nether Bricks', 'nether_bricks'], ['building', 'End Stone Bricks', 'end_stone_bricks'], ['building', 'Prismarine', 'prismarine'], ['building', 'Glass', 'glass'], ['building', 'Tinted Glass', 'tinted_glass'], ['building', 'Sandstone', 'sandstone'], ['building', 'Quartz Block', 'quartz_block_side'], ['building', 'White Concrete', 'white_concrete'], ['building', 'White Wool', 'white_wool'], ['building', 'Terracotta', 'terracotta'], ['building', 'Iron Block', 'iron_block'], ['building', 'Copper Block', 'copper_block'], ['building', 'Bookshelf', 'bookshelf'], ['building', 'Lantern', 'lantern'], ['building', 'Glowstone', 'glowstone'], ['building', 'Sea Lantern', 'sea_lantern'], ['building', 'Jack o\'Lantern', 'jack_o_lantern'],
+        ['utility', 'Crafting Table', 'crafting_table_front'], ['utility', 'Furnace', 'furnace_front'], ['utility', 'Blast Furnace', 'blast_furnace_front'], ['utility', 'Smoker', 'smoker_front'], ['utility', 'Anvil', 'anvil'], ['utility', 'Grindstone', 'grindstone_side'], ['utility', 'Smithing Table', 'smithing_table_front'], ['utility', 'Stonecutter', 'stonecutter_side'], ['utility', 'Loom', 'loom_front'], ['utility', 'Cartography Table', 'cartography_table_side'], ['utility', 'Barrel', 'barrel_side'], ['utility', 'Chest', 'chest_front'], ['utility', 'Ender Chest', 'ender_chest_front'], ['utility', 'Enchanting Table', 'enchanting_table_side'], ['utility', 'Brewing Stand', 'brewing_stand'], ['utility', 'Cauldron', 'cauldron_side'], ['utility', 'Beacon', 'beacon'], ['utility', 'Conduit', 'conduit'], ['utility', 'Respawn Anchor', 'respawn_anchor_top'],
+        ['redstone', 'Redstone Torch', 'redstone_torch'], ['redstone', 'Lever', 'lever'], ['redstone', 'Target Block', 'target_side'], ['redstone', 'Daylight Detector', 'daylight_detector_side'], ['redstone', 'Redstone Dust', 'redstone_block'], ['redstone', 'Repeater', 'repeater'], ['redstone', 'Comparator', 'comparator'], ['redstone', 'Piston', 'piston_side'], ['redstone', 'Sticky Piston', 'sticky_piston_side'], ['redstone', 'Dispenser', 'dispenser_front'], ['redstone', 'Dropper', 'dropper_front'], ['redstone', 'Hopper', 'hopper_outside'], ['redstone', 'Observer', 'observer_front'], ['redstone', 'Note Block', 'note_block'], ['redstone', 'Jukebox', 'jukebox_side'], ['redstone', 'Crafter', 'crafter_side'], ['redstone', 'TNT', 'tnt_side'],
+        ['dimensions', 'Netherrack', 'netherrack'], ['dimensions', 'Soul Sand', 'soul_sand'], ['dimensions', 'Soul Soil', 'soul_soil'], ['dimensions', 'Basalt', 'basalt_side'], ['dimensions', 'Blackstone', 'blackstone'], ['dimensions', 'Magma Block', 'magma'], ['dimensions', 'Crying Obsidian', 'crying_obsidian'], ['dimensions', 'Crimson Nylium', 'crimson_nylium'], ['dimensions', 'Warped Nylium', 'warped_nylium'], ['dimensions', 'End Stone', 'end_stone'], ['dimensions', 'End Stone Bricks', 'end_stone_bricks'], ['dimensions', 'Purpur Block', 'purpur_block'], ['dimensions', 'Purpur Pillar', 'purpur_pillar'], ['dimensions', 'Chorus Plant', 'chorus_plant'], ['dimensions', 'End Rod', 'end_rod'],
+        ['special', 'Bedrock', 'bedrock'], ['special', 'Barrier', 'barrier'], ['special', 'Command Block', 'command_block_side'], ['special', 'Structure Block', 'structure_block'], ['special', 'Jigsaw Block', 'jigsaw_top'], ['special', 'Light Block', 'light_block_15']
+      ];
+
+      const variantCatalog = [];
+      const addStairsAndSlabs = (category, names) => names.forEach(([name, texture]) => {
+        variantCatalog.push([category, `${name} Stairs`, `${texture}_stairs`], [category, `${name} Slab`, `${texture}_slab`]);
+      });
+
+      addStairsAndSlabs('wood', [['Oak', 'oak'], ['Spruce', 'spruce'], ['Birch', 'birch'], ['Jungle', 'jungle'], ['Acacia', 'acacia'], ['Dark Oak', 'dark_oak'], ['Mangrove', 'mangrove'], ['Cherry', 'cherry'], ['Pale Oak', 'dark_oak'], ['Bamboo', 'bamboo_mosaic'], ['Crimson', 'crimson'], ['Warped', 'warped']]);
+      addStairsAndSlabs('terrain', [['Cobblestone', 'cobblestone'], ['Mossy Cobblestone', 'mossy_cobblestone'], ['Stone', 'stone'], ['Smooth Stone', 'smooth_stone'], ['Sandstone', 'sandstone'], ['Cut Sandstone', 'cut_sandstone'], ['Red Sandstone', 'red_sandstone'], ['Cut Red Sandstone', 'cut_red_sandstone'], ['Brick', 'brick'], ['Mud Brick', 'mud_brick'], ['Stone Brick', 'stone_brick'], ['Mossy Stone Brick', 'mossy_stone_brick'], ['Cobbled Deepslate', 'cobbled_deepslate'], ['Polished Deepslate', 'polished_deepslate'], ['Deepslate Brick', 'deepslate_brick'], ['Deepslate Tile', 'deepslate_tile'], ['Granite', 'granite'], ['Polished Granite', 'polished_granite'], ['Diorite', 'diorite'], ['Polished Diorite', 'polished_diorite'], ['Andesite', 'andesite'], ['Polished Andesite', 'polished_andesite'], ['Tuff', 'tuff'], ['Polished Tuff', 'polished_tuff'], ['Tuff Brick', 'tuff_brick']]);
+      addStairsAndSlabs('dimensions', [['Blackstone', 'blackstone'], ['Polished Blackstone', 'polished_blackstone'], ['Polished Blackstone Brick', 'polished_blackstone_brick'], ['Quartz', 'quartz_block'], ['Smooth Quartz', 'smooth_quartz'], ['Purpur', 'purpur'], ['Prismarine', 'prismarine'], ['Prismarine Brick', 'prismarine_bricks'], ['Dark Prismarine', 'dark_prismarine'], ['Nether Brick', 'nether_brick'], ['Red Nether Brick', 'red_nether_brick'], ['End Stone Brick', 'end_stone_brick']]);
+      addStairsAndSlabs('ores', [['Cut Copper', 'cut_copper'], ['Exposed Cut Copper', 'exposed_cut_copper'], ['Weathered Cut Copper', 'weathered_cut_copper'], ['Oxidized Cut Copper', 'oxidized_cut_copper']]);
+      blockCatalog.push(...variantCatalog);
+
+      const textureBase = 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.4/assets/minecraft/textures/block/';
+      const blockPalette = document.getElementById('blockPalette');
+      const textureAliases = {
+        grass_block: 'grass_block_side',
+        snow_block: 'snow',
+        azalea: 'azalea_side',
+        bamboo: 'bamboo_stalk',
+        cactus: 'cactus_side',
+        cartography_table_side: 'crafting_table_side',
+        chest_front: 'oak_planks',
+        ender_chest_front: 'obsidian',
+        sticky_piston_side: 'piston_side',
+        crafter_side: 'crafting_table_side',
+        barrier: 'bedrock',
+        light_block_15: 'glowstone',
+        oak: 'oak_planks',
+        spruce: 'spruce_planks',
+        birch: 'birch_planks',
+        jungle: 'jungle_planks',
+        acacia: 'acacia_planks',
+        dark_oak: 'dark_oak_planks',
+        mangrove: 'mangrove_planks',
+        cherry: 'cherry_planks',
+        bamboo_mosaic: 'bamboo_planks',
+        crimson: 'crimson_planks',
+        warped: 'warped_planks',
+        quartz_block: 'quartz_block_side',
+        smooth_quartz: 'quartz_block_side',
+        brick: 'bricks',
+        mud_brick: 'mud_bricks',
+        stone_brick: 'stone_bricks',
+        mossy_stone_brick: 'mossy_stone_bricks',
+        deepslate_brick: 'deepslate_bricks',
+        deepslate_tile: 'deepslate_tiles',
+        tuff_brick: 'tuff_bricks',
+        polished_blackstone_brick: 'polished_blackstone_bricks',
+        purpur: 'purpur_block',
+        nether_brick: 'nether_bricks',
+        red_nether_brick: 'red_nether_bricks',
+        end_stone_brick: 'end_stone_bricks'
+      };
+
+      function resolveTexture(texture) {
+        const baseTexture = texture.replace(/_(stairs|slab)$/, '');
+        return textureAliases[texture] || textureAliases[baseTexture] || baseTexture;
+      }
+
+      function renderPalette(category) {
+        blockPalette.innerHTML = blockCatalog
+          .filter(([blockCategory]) => category === 'all' || blockCategory === category)
+          .map(([blockCategory, blockName, texture]) => `<button class="block-option" type="button" data-block="${blockName}" data-category="${blockCategory}"><img class="block-image" src="${textureBase}${resolveTexture(texture)}.png" alt="" />${blockName}</button>`)
+          .join('');
+      }
+
+      function getBlockTexture(blockName) {
+        const block = blockCatalog.find(([, name]) => name === blockName);
+        return block ? resolveTexture(block[2]) : 'stone';
+      }
+
+      function renderBuildBlocks() {
+        savedBlocks.innerHTML = '';
+        const blockNames = Object.keys(buildBlocks);
+        if (!blockNames.length) {
+          savedBlocks.innerHTML = '<p class="saved-empty">No blocks saved yet. Choose one to get started.</p>';
+          return;
+        }
+        blockNames.forEach((blockName) => {
+          const item = document.createElement('div');
+          item.className = 'saved-item';
+          item.innerHTML = `<img class="block-image" src="${textureBase}${getBlockTexture(blockName)}.png" alt="${blockName}" /><span>${blockName}</span><span class="quantity-control"><button type="button" data-action="decrease" data-block="${blockName}" aria-label="Remove one ${blockName}">−</button><strong>${buildBlocks[blockName]}</strong><button type="button" data-action="increase" data-block="${blockName}" aria-label="Add one ${blockName}">+</button></span>`;
+          savedBlocks.appendChild(item);
+        });
+        localStorage.setItem(blockStorageKey, JSON.stringify(buildBlocks));
+      }
+
+      document.getElementById('blockPalette').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-block]');
+        if (!button) return;
+        const blockName = button.dataset.block;
+        buildBlocks[blockName] = (buildBlocks[blockName] || 0) + 1;
+        renderBuildBlocks();
+      });
+
+      document.getElementById('categoryList').addEventListener('click', (event) => {
+        const categoryButton = event.target.closest('[data-category]');
+        if (!categoryButton) return;
+        const category = categoryButton.dataset.category;
+        document.querySelectorAll('.category-button').forEach((button) => button.classList.toggle('active', button === categoryButton));
+        renderPalette(category);
+      });
+
+      savedBlocks.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+        const blockName = button.dataset.block;
+        buildBlocks[blockName] += button.dataset.action === 'increase' ? 1 : -1;
+        if (buildBlocks[blockName] <= 0) delete buildBlocks[blockName];
+        renderBuildBlocks();
+      });
+
+      document.getElementById('clearBlocks').addEventListener('click', () => {
+        buildBlocks = {};
+        renderBuildBlocks();
+      });
+
+      const materialsToggle = document.getElementById('materialsToggle');
+      const buildHub = document.getElementById('build-hub');
+      materialsToggle.addEventListener('click', () => {
+        const isOpen = !buildHub.hidden;
+        buildHub.hidden = isOpen;
+        materialsToggle.textContent = isOpen ? 'Open Build Hub' : 'Close Build Hub';
+        materialsToggle.setAttribute('aria-expanded', String(!isOpen));
+        if (!isOpen) buildHub.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      renderPalette('all');
+      renderBuildBlocks();
     </script>
   </body>
 </html>
