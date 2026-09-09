@@ -315,6 +315,19 @@
       .build-controls input:focus,
       .build-controls select:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
 
+      .delete-build {
+        padding: 9px 10px;
+        color: var(--orange);
+        background: transparent;
+        border: 1px solid var(--orange);
+        border-radius: 7px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.82rem;
+      }
+
+      .delete-build:hover { color: var(--surface); background: var(--orange); }
+
       .hub-grid {
         display: grid;
         grid-template-columns: 1.1fr 0.9fr;
@@ -559,6 +572,7 @@
                 <input id="newBuildName" type="text" placeholder="Name your build" maxlength="40" aria-label="Name your build" />
                 <button class="button primary" id="createBuild" type="button">Create Build</button>
                 <select id="buildSelect" aria-label="Choose a saved build"></select>
+                <button class="delete-build" id="deleteBuild" type="button">Delete This Build</button>
               </div>
             </div>
           </div>
@@ -818,6 +832,23 @@
         activeBuildName = buildSelect.value;
         buildBlocks = buildProjects[activeBuildName];
         selectedBiome = buildBiomes[activeBuildName] || '';
+        renderBiomeGallery();
+        renderBuildBlocks();
+      });
+
+      document.getElementById('deleteBuild').addEventListener('click', () => {
+        const confirmed = window.confirm(`Are you sure you want to delete "${activeBuildName}"? This cannot be undone.`);
+        if (!confirmed) return;
+        delete buildProjects[activeBuildName];
+        delete buildBiomes[activeBuildName];
+        const remainingBuilds = Object.keys(buildProjects);
+        if (!remainingBuilds.length) buildProjects['My First Build'] = {};
+        activeBuildName = Object.keys(buildProjects)[0];
+        buildBlocks = buildProjects[activeBuildName];
+        selectedBiome = buildBiomes[activeBuildName] || '';
+        localStorage.setItem(projectsStorageKey, JSON.stringify(buildProjects));
+        localStorage.setItem(biomeStorageKey, JSON.stringify(buildBiomes));
+        renderBuildChoices();
         renderBiomeGallery();
         renderBuildBlocks();
       });
