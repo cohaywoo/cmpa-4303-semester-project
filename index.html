@@ -325,6 +325,8 @@
       .file-upload-label:hover { border-color: var(--grass); color: var(--grass); }
       .file-chosen { max-width: 150px; overflow: hidden; color: var(--muted); font-size: 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
       .share-status { display: inline-block; color: var(--grass); font-size: 0.78rem; }
+      .toast { position: fixed; right: 22px; bottom: 22px; z-index: 1200; max-width: 300px; padding: 12px 15px; color: #fff; background: var(--leaf-dark); border: 1px solid var(--lime); border-radius: 7px; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transform: translateY(12px); transition: opacity 0.25s ease, transform 0.25s ease; }
+      .toast.visible { opacity: 1; transform: translateY(0); }
 
       .delete-build {
         padding: 9px 10px;
@@ -359,6 +361,8 @@
         gap: 7px;
         margin-bottom: 14px;
       }
+      .block-search { width: 100%; margin-bottom: 10px; padding: 11px 12px; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; font: inherit; }
+      .block-search:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
 
       .category-button {
         padding: 7px 10px;
@@ -435,6 +439,12 @@
         color: var(--muted);
         font-size: 0.9rem;
       }
+      .inventory-summary { margin: 15px 0; padding: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; font-size: 0.8rem; line-height: 1.5; }
+      .inventory-summary strong { color: var(--gold); }
+      .export-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .export-actions .button { padding: 8px 10px; font-size: 0.78rem; }
+      .export-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .export-actions .button { padding: 8px 10px; font-size: 0.78rem; }
 
       .saved-item {
         display: flex;
@@ -519,6 +529,14 @@
         .hub-grid { grid-template-columns: 1fr; }
         .block-palette { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .biome-gallery { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media print {
+        body { background: #fff; color: #111; }
+        body::before, .theme-toggle, header, .hero, .feature-grid, .hub-heading, .category-list, .block-search, .block-palette, .clear-button, .export-actions, .toast, .biome-gallery { display: none !important; }
+        .page, .container, .hub, .hub-grid, .hub-panel { display: block; width: 100%; margin: 0; padding: 0; border: 0; box-shadow: none; background: #fff; }
+        .saved-blocks { color: #111; }
+        .saved-item, .inventory-summary { border: 1px solid #bbb; background: #fff; color: #111; }
+        .quantity-control button, .quantity-input, .delete-item-button { display: none; }
       }
     </style>
   </head>
@@ -605,6 +623,7 @@
           <div class="hub-grid">
             <div class="hub-panel">
               <h3>Choose blocks</h3>
+              <input class="block-search" id="blockSearch" type="search" placeholder="Search blocks, like Stone or Oak" aria-label="Search blocks" />
               <div class="category-list" id="categoryList" aria-label="Block categories">
                 <button class="category-button active" type="button" data-category="all">All</button>
                 <button class="category-button" type="button" data-category="terrain">Natural &amp; Terrain</button>
@@ -621,12 +640,18 @@
             <div class="hub-panel">
               <h3>My saved blocks</h3>
               <div class="saved-blocks" id="savedBlocks" aria-live="polite"></div>
+              <div class="inventory-summary" id="inventorySummary"></div>
               <button class="clear-button" id="clearBlocks" type="button">Clear my list</button>
+              <div class="export-actions">
+                <button class="button secondary" id="copyShoppingList" type="button">Copy Shopping List</button>
+                <button class="button secondary" id="printBuild" type="button">Print Checklist</button>
+              </div>
             </div>
           </div>
         </section>
       </div>
     </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script>
       // Theme toggle functionality
       const themeToggle = document.getElementById('themeToggle');
@@ -666,6 +691,10 @@
       let buildBlocks = buildProjects[activeBuildName];
       const buildSelect = document.getElementById('buildSelect');
       const shareBuild = document.getElementById('shareBuild');
+      const toast = document.getElementById('toast');
+      let toastTimer;
+      let activeCategory = 'all';
+      let blockSearchTerm = '';
       const biomeStorageKey = 'blockcraft-build-biomes';
       const buildBiomes = JSON.parse(localStorage.getItem(biomeStorageKey) || '{}');
       let selectedBiome = buildBiomes[activeBuildName] || '';
@@ -763,9 +792,16 @@
         return textureAliases[texture] || textureAliases[baseTexture] || baseTexture;
       }
 
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add('visible');
+        toastTimer = setTimeout(() => toast.classList.remove('visible'), 3000);
+      }
+
       function renderPalette(category) {
         blockPalette.innerHTML = blockCatalog
-          .filter(([blockCategory]) => category === 'all' || blockCategory === category)
+          .filter(([blockCategory, blockName]) => (category === 'all' || blockCategory === category) && blockName.toLowerCase().includes(blockSearchTerm))
           .map(([blockCategory, blockName, texture]) => `<button class="block-option" type="button" data-block="${blockName}" data-category="${blockCategory}"><img class="block-image" src="${textureBase}${resolveTexture(texture)}.png" alt="" />${blockName}</button>`)
           .join('');
       }
@@ -775,12 +811,24 @@
         return block ? resolveTexture(block[2]) : 'stone';
       }
 
+      function renderInventorySummary() {
+        const blockNames = Object.keys(buildBlocks);
+        const totalBlocks = blockNames.reduce((total, blockName) => total + buildBlocks[blockName], 0);
+        const totalStacks = Math.ceil(totalBlocks / 64);
+        const inventorySlots = blockNames.reduce((slots, blockName) => slots + Math.ceil(buildBlocks[blockName] / 64), 0);
+        const chestCount = Math.ceil(inventorySlots / 27);
+        const chestLabel = chestCount === 1 ? '1 Single Chest' : `${chestCount} Chests`;
+        const details = blockNames.map((blockName) => `${blockName}: ${buildBlocks[blockName]} blocks = ${Math.ceil(buildBlocks[blockName] / 64)} stack${Math.ceil(buildBlocks[blockName] / 64) === 1 ? '' : 's'}`).join('<br />');
+        document.getElementById('inventorySummary').innerHTML = `<strong>Storage estimate</strong><br />${details || 'Add blocks to calculate storage.'}<br /><strong>${totalBlocks} blocks = ${totalStacks} stacks</strong><br />${inventorySlots} inventory slots / ${chestLabel}`;
+      }
+
       function renderBuildBlocks() {
         savedBlocks.innerHTML = '';
         buildProjects[activeBuildName] = buildBlocks;
         localStorage.setItem(projectsStorageKey, JSON.stringify(buildProjects));
         const blockNames = Object.keys(buildBlocks);
         document.getElementById('clearBlocks').hidden = blockNames.length === 0;
+        renderInventorySummary();
         if (!blockNames.length) {
           savedBlocks.innerHTML = '<p class="saved-empty">No blocks saved yet. Choose one to get started.</p>';
           return;
@@ -821,8 +869,14 @@
         const categoryButton = event.target.closest('[data-category]');
         if (!categoryButton) return;
         const category = categoryButton.dataset.category;
+        activeCategory = category;
         document.querySelectorAll('.category-button').forEach((button) => button.classList.toggle('active', button === categoryButton));
         renderPalette(category);
+      });
+
+      document.getElementById('blockSearch').addEventListener('input', (event) => {
+        blockSearchTerm = event.target.value.trim().toLowerCase();
+        renderPalette(activeCategory);
       });
 
       savedBlocks.addEventListener('click', (event) => {
@@ -864,6 +918,10 @@
         renderBuildChoices();
         renderBiomeGallery();
         renderBuildBlocks();
+      });
+
+      document.getElementById('newBuildName').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') document.getElementById('createBuild').click();
       });
 
       buildSelect.addEventListener('change', () => {
@@ -916,17 +974,30 @@
         try {
           if (navigator.share) {
             await navigator.share(shareData);
-            document.getElementById('shareStatus').textContent = 'Build shared.';
+            showToast('Build shared.');
           } else if (navigator.clipboard) {
             await navigator.clipboard.writeText(`${shareText}\n${shareData.url}`);
-            document.getElementById('shareStatus').textContent = 'Build details copied.';
+            showToast('Build details copied.');
           } else {
-            document.getElementById('shareStatus').textContent = 'Sharing is not available here.';
+            showToast('Sharing is not available here.');
           }
         } catch (error) {
-          if (error.name !== 'AbortError') document.getElementById('shareStatus').textContent = 'Sharing was canceled.';
+          if (error.name !== 'AbortError') showToast('Sharing was canceled.');
         }
       });
+
+      document.getElementById('copyShoppingList').addEventListener('click', async () => {
+        const lines = Object.entries(buildBlocks).map(([blockName, amount]) => `- ${blockName}: x${amount}`);
+        const shoppingList = [`--- ${activeBuildName} ---`, ...lines].join('\n');
+        try {
+          await navigator.clipboard.writeText(shoppingList);
+          showToast('Shopping list copied.');
+        } catch (error) {
+          showToast('Copy is not available in this browser.');
+        }
+      });
+
+      document.getElementById('printBuild').addEventListener('click', () => window.print());
 
       document.getElementById('biomeToggle').addEventListener('click', () => {
         const gallery = document.getElementById('biomeGallery');
@@ -952,6 +1023,19 @@
         materialsToggle.textContent = isOpen ? 'Open Build Hub' : 'Close Build Hub';
         materialsToggle.setAttribute('aria-expanded', String(!isOpen));
         if (!isOpen) buildHub.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        const gallery = document.getElementById('biomeGallery');
+        if (!gallery.hidden) {
+          gallery.hidden = true;
+          document.getElementById('biomeToggle').setAttribute('aria-expanded', 'false');
+        } else if (!buildHub.hidden) {
+          buildHub.hidden = true;
+          materialsToggle.textContent = 'Open Build Hub';
+          materialsToggle.setAttribute('aria-expanded', 'false');
+        }
       });
 
       renderPalette('all');
