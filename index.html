@@ -580,7 +580,7 @@
                 <select id="buildSelect" aria-label="Choose a saved build"></select>
                 <button class="delete-build" id="deleteBuild" type="button">Delete This Build</button>
                 <label class="screenshot-label">Add screenshots <input id="buildScreenshot" type="file" accept="image/*" multiple /></label>
-                <button class="button secondary" id="shareBuild" type="button">Share This Build</button>
+                <button class="button secondary" id="shareBuild" type="button" hidden>Share This Build</button>
                 <span class="share-status" id="shareStatus" role="status" aria-live="polite"></span>
               </div>
             </div>
@@ -648,6 +648,7 @@
       let activeBuildName = Object.keys(buildProjects)[0];
       let buildBlocks = buildProjects[activeBuildName];
       const buildSelect = document.getElementById('buildSelect');
+      const shareBuild = document.getElementById('shareBuild');
       const biomeStorageKey = 'blockcraft-build-biomes';
       const buildBiomes = JSON.parse(localStorage.getItem(biomeStorageKey) || '{}');
       let selectedBiome = buildBiomes[activeBuildName] || '';
@@ -777,6 +778,7 @@
       function renderBuildChoices() {
         buildSelect.innerHTML = Object.keys(buildProjects).map((buildName) => `<option value="${buildName}">${buildName}</option>`).join('');
         buildSelect.value = activeBuildName;
+        shareBuild.hidden = !Object.keys(savedBuilds).length && Object.keys(buildProjects).length <= 1 && activeBuildName === 'My First Build';
       }
 
       function renderBiomeGallery() {
