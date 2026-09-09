@@ -383,6 +383,19 @@
 
       .quantity-control button:hover { border-color: var(--grass); }
 
+      .quantity-input {
+        width: 52px;
+        padding: 4px;
+        color: var(--text);
+        background: var(--panel);
+        border: 1px solid rgba(236, 253, 245, 0.3);
+        border-radius: 5px;
+        font: inherit;
+        text-align: center;
+      }
+
+      .quantity-input:focus { outline: 2px solid var(--grass); outline-offset: 1px; }
+
       .clear-button {
         margin-top: 14px;
         padding: 7px 0;
@@ -642,7 +655,7 @@
         blockNames.forEach((blockName) => {
           const item = document.createElement('div');
           item.className = 'saved-item';
-          item.innerHTML = `<img class="block-image" src="${textureBase}${getBlockTexture(blockName)}.png" alt="${blockName}" /><span>${blockName}</span><span class="quantity-control"><button type="button" data-action="decrease" data-block="${blockName}" aria-label="Remove one ${blockName}">−</button><strong>${buildBlocks[blockName]}</strong><button type="button" data-action="increase" data-block="${blockName}" aria-label="Add one ${blockName}">+</button></span>`;
+          item.innerHTML = `<img class="block-image" src="${textureBase}${getBlockTexture(blockName)}.png" alt="${blockName}" /><span>${blockName}</span><span class="quantity-control"><button type="button" data-action="decrease" data-block="${blockName}" aria-label="Remove one ${blockName}">−</button><input class="quantity-input" type="number" min="1" step="1" value="${buildBlocks[blockName]}" data-block="${blockName}" aria-label="Amount of ${blockName}" /><button type="button" data-action="increase" data-block="${blockName}" aria-label="Add one ${blockName}">+</button></span>`;
           savedBlocks.appendChild(item);
         });
         localStorage.setItem(blockStorageKey, JSON.stringify(buildBlocks));
@@ -670,6 +683,14 @@
         const blockName = button.dataset.block;
         buildBlocks[blockName] += button.dataset.action === 'increase' ? 1 : -1;
         if (buildBlocks[blockName] <= 0) delete buildBlocks[blockName];
+        renderBuildBlocks();
+      });
+
+      savedBlocks.addEventListener('change', (event) => {
+        if (!event.target.matches('.quantity-input')) return;
+        const blockName = event.target.dataset.block;
+        const amount = Math.max(1, Math.floor(Number(event.target.value) || 1));
+        buildBlocks[blockName] = amount;
         renderBuildBlocks();
       });
 
