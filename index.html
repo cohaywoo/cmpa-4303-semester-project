@@ -236,6 +236,7 @@
       .biome-card.selected { outline: 3px solid var(--gold); outline-offset: 2px; }
       .biome-card strong { display: block; margin-bottom: 6px; font-size: 0.9rem; }
       .biome-card small { font-size: 0.7rem; opacity: 0.9; }
+      .biome-builds { display: block; min-height: 25px; margin-top: 8px; line-height: 1.25; }
       .biome-action { margin-top: 8px; padding: 5px 7px; color: var(--ink); background: var(--lime); border: 0; border-radius: 4px; cursor: pointer; font: inherit; font-size: 0.7rem; font-weight: bold; }
 
       .feature-grid {
@@ -754,7 +755,11 @@
       }
 
       function renderBiomeGallery() {
-        document.getElementById('biomeGallery').innerHTML = biomeCatalog.map(([name, description, start, end]) => `<button class="biome-card${selectedBiome === name ? ' selected' : ''}" type="button" data-biome="${name}" style="--biome-start: ${start}; --biome-end: ${end};"><strong>${name}</strong><small>${description}</small><span class="biome-action">${selectedBiome === name ? 'Added to build' : 'Add to build'}</span></button>`).join('');
+        document.getElementById('biomeGallery').innerHTML = biomeCatalog.map(([name, description, start, end]) => {
+          const matchingBuilds = Object.keys(buildBiomes).filter((buildName) => buildBiomes[buildName] === name);
+          const buildText = matchingBuilds.length ? `Builds: ${matchingBuilds.join(', ')}` : 'No builds assigned yet';
+          return `<button class="biome-card${selectedBiome === name ? ' selected' : ''}" type="button" data-biome="${name}" style="--biome-start: ${start}; --biome-end: ${end};"><strong>${name}</strong><small>${description}</small><small class="biome-builds">${buildText}</small><span class="biome-action">${selectedBiome === name ? 'Added to build' : 'Add to build'}</span></button>`;
+        }).join('');
       }
 
       document.getElementById('blockPalette').addEventListener('click', (event) => {
