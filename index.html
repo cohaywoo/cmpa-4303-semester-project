@@ -237,6 +237,8 @@
       .biome-card strong { display: block; margin-bottom: 6px; font-size: 0.9rem; }
       .biome-card small { font-size: 0.7rem; opacity: 0.9; }
       .biome-builds { display: block; min-height: 25px; margin-top: 8px; line-height: 1.25; }
+      .biome-screenshots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-top: 8px; }
+      .biome-screenshots img { width: 100%; height: 54px; object-fit: cover; border: 1px solid rgba(255,255,255,0.5); border-radius: 4px; }
       .biome-action { margin-top: 8px; padding: 5px 7px; color: var(--ink); background: var(--lime); border: 0; border-radius: 4px; cursor: pointer; font: inherit; font-size: 0.7rem; font-weight: bold; }
 
       .feature-grid {
@@ -314,6 +316,9 @@
 
       .build-controls input:focus,
       .build-controls select:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
+
+      .screenshot-label { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 0.8rem; }
+      .screenshot-label input { min-width: 0; max-width: 190px; padding: 7px; font-size: 0.75rem; }
 
       .delete-build {
         padding: 9px 10px;
@@ -573,6 +578,7 @@
                 <button class="button primary" id="createBuild" type="button">Create Build</button>
                 <select id="buildSelect" aria-label="Choose a saved build"></select>
                 <button class="delete-build" id="deleteBuild" type="button">Delete This Build</button>
+                <label class="screenshot-label">Add screenshots <input id="buildScreenshot" type="file" accept="image/*" multiple /></label>
               </div>
             </div>
           </div>
@@ -642,6 +648,8 @@
       const biomeStorageKey = 'blockcraft-build-biomes';
       const buildBiomes = JSON.parse(localStorage.getItem(biomeStorageKey) || '{}');
       let selectedBiome = buildBiomes[activeBuildName] || '';
+      const screenshotStorageKey = 'blockcraft-build-screenshots';
+      const buildScreenshots = JSON.parse(localStorage.getItem(screenshotStorageKey) || '{}');
       const biomeCatalog = [
         ['Plains', 'Open fields', '#9dcc72', '#d9ef9d'],
         ['Forest', 'Oak and birch', '#2d6b43', '#9dcf6b'],
@@ -772,7 +780,9 @@
         document.getElementById('biomeGallery').innerHTML = biomeCatalog.map(([name, description, start, end]) => {
           const matchingBuilds = Object.keys(buildBiomes).filter((buildName) => buildBiomes[buildName] === name);
           const buildText = matchingBuilds.length ? `Builds: ${matchingBuilds.join(', ')}` : 'No builds assigned yet';
-          return `<button class="biome-card${selectedBiome === name ? ' selected' : ''}" type="button" data-biome="${name}" style="--biome-start: ${start}; --biome-end: ${end};"><strong>${name}</strong><small>${description}</small><small class="biome-builds">${buildText}</small><span class="biome-action">${selectedBiome === name ? 'Added to build' : 'Add to build'}</span></button>`;
+          const screenshots = matchingBuilds.flatMap((buildName) => buildScreenshots[buildName] || []).slice(0, 4);
+          const screenshotMarkup = screenshots.length ? `<span class="biome-screenshots">${screenshots.map((image) => `<img src="${image}" alt="Screenshot from a ${name} build" />`).join('')}</span>` : '';
+          return `<button class="biome-card${selectedBiome === name ? ' selected' : ''}" type="button" data-biome="${name}" style="--biome-start: ${start}; --biome-end: ${end};"><strong>${name}</strong><small>${description}</small><small class="biome-builds">${buildText}</small>${screenshotMarkup}<span class="biome-action">${selectedBiome === name ? 'Added to build' : 'Add to build'}</span></button>`;
         }).join('');
       }
 
@@ -841,6 +851,7 @@
         if (!confirmed) return;
         delete buildProjects[activeBuildName];
         delete buildBiomes[activeBuildName];
+        delete buildScreenshots[activeBuildName];
         const remainingBuilds = Object.keys(buildProjects);
         if (!remainingBuilds.length) buildProjects['My First Build'] = {};
         activeBuildName = Object.keys(buildProjects)[0];
@@ -848,9 +859,25 @@
         selectedBiome = buildBiomes[activeBuildName] || '';
         localStorage.setItem(projectsStorageKey, JSON.stringify(buildProjects));
         localStorage.setItem(biomeStorageKey, JSON.stringify(buildBiomes));
+        localStorage.setItem(screenshotStorageKey, JSON.stringify(buildScreenshots));
         renderBuildChoices();
         renderBiomeGallery();
         renderBuildBlocks();
+      });
+
+      document.getElementById('buildScreenshot').addEventListener('change', (event) => {
+        const files = [...event.target.files].slice(0, 4);
+        if (!files.length) return;
+        Promise.all(files.map((file) => new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.addEventListener('load', () => resolve(reader.result));
+          reader.readAsDataURL(file);
+        }))).then((images) => {
+          buildScreenshots[activeBuildName] = images;
+          localStorage.setItem(screenshotStorageKey, JSON.stringify(buildScreenshots));
+          renderBiomeGallery();
+          event.target.value = '';
+        });
       });
 
       document.getElementById('biomeToggle').addEventListener('click', () => {
