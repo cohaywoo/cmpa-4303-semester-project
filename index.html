@@ -22,8 +22,8 @@
         --panel-2: #cfe2d7;
         --grass: #216b47;
         --gold: #916b00;
-        --text: #123326;
-        --muted: #315b48;
+        --text: #080b09;
+        --muted: #252a27;
         --shadow: rgba(0, 0, 0, 0.1);
       }
 
@@ -159,6 +159,8 @@
       [data-theme="light"] .button.secondary {
         border-color: rgba(26, 58, 48, 0.3);
       }
+
+      [data-theme="light"] .button.primary { color: #fff; }
 
       .card {
         background: rgba(36, 77, 59, 0.64);
@@ -444,6 +446,8 @@
       .block-option::after { content: ""; position: absolute; inset: 0; background: rgba(74, 222, 128, 0.5); opacity: 0; pointer-events: none; transition: opacity 0.3s ease-out; }
       .block-option:active::before { animation: wave-expand 0.4s ease-out; }
       .block-option:active::after { opacity: 1; transition: opacity 0s; }
+
+      [data-theme="light"] .block-option { color: #f4fff6; }
 
       @keyframes wave-expand {
         0% { width: 0; height: 0; opacity: 1; }
