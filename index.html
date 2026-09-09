@@ -323,19 +323,19 @@
       .hub-heading p { margin: 6px 0 0; font-size: 0.92rem; }
 
       .build-controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
+        display: grid;
+        gap: 10px;
         margin-top: 16px;
       }
 
-      .control-group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .control-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      .control-row.secondary-actions { padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); }
 
       .build-controls input,
       .build-controls select {
         min-width: 180px;
-        padding: 10px;
+        min-height: 42px;
+        padding: 9px 12px;
         color: var(--text);
         background: var(--surface);
         border: 1px solid var(--line);
@@ -349,6 +349,7 @@
       .screenshot-label { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 0.8rem; }
       .file-upload-wrapper { display: inline-flex; align-items: center; gap: 8px; }
       .file-upload-label { padding: 9px 12px; color: var(--text); background: transparent; border: 1px solid var(--line); border-radius: 7px; cursor: pointer; font-size: 0.82rem; }
+      .build-controls .button, .delete-build, .file-upload-label { min-height: 42px; display: inline-flex; align-items: center; }
       .file-upload-label:hover { border-color: var(--grass); color: var(--grass); }
       .file-chosen { max-width: 150px; overflow: hidden; color: var(--muted); font-size: 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
       .share-status { display: inline-block; color: var(--grass); font-size: 0.78rem; }
@@ -390,6 +391,8 @@
       }
 
       .hub-panel h3 { margin: 0 0 14px; font-size: 1rem; }
+      .saved-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .saved-count { padding: 3px 8px; color: var(--leaf-dark); background: var(--lime); border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
 
       .category-list {
         display: flex;
@@ -488,10 +491,15 @@
       .saved-blocks { display: grid; gap: 8px; min-height: 80px; }
 
       .saved-empty {
+        display: flex;
+        align-items: center;
+        gap: 9px;
         margin: 0;
         color: var(--muted);
         font-size: 0.9rem;
       }
+
+      .empty-icon { display: grid; place-items: center; width: 28px; height: 28px; color: var(--grass); background: rgba(110, 203, 99, 0.12); border: 1px solid rgba(110, 203, 99, 0.3); border-radius: 50%; font-size: 0.85rem; }
       .inventory-summary { margin: 15px 0; padding: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; font-size: 0.8rem; line-height: 1.5; }
       .inventory-summary strong { color: var(--gold); }
       .export-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
@@ -581,6 +589,9 @@
         .hub-heading { display: block; }
         .hub-grid { grid-template-columns: 1fr; }
         .block-palette { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .block-option { min-height: 58px; }
+        .control-row { width: 100%; }
+        .control-row > * { flex: 1 1 180px; }
         .biome-gallery { grid-template-columns: repeat(2, 1fr); }
       }
       @media print {
@@ -655,12 +666,12 @@
               <h2 id="hub-title">My Build Hub</h2>
               <p>Choose a block to add it to your personal build list.</p>
               <div class="build-controls">
-                <div class="control-group">
+                <div class="control-row project-actions">
                   <input id="newBuildName" type="text" placeholder="Name your build" maxlength="40" aria-label="Name your build" />
                   <button class="button primary" id="createBuild" type="button">Create Build</button>
-                </div>
-                <div class="control-group">
                   <select id="buildSelect" aria-label="Choose a saved build"></select>
+                </div>
+                <div class="control-row secondary-actions">
                   <button class="delete-build" id="deleteBuild" type="button">Delete This Build</button>
                 </div>
                 <div class="file-upload-wrapper">
@@ -691,7 +702,7 @@
               <div class="block-palette" id="blockPalette"></div>
             </div>
             <div class="hub-panel">
-              <h3>My saved blocks</h3>
+              <div class="saved-heading"><h3>My saved blocks</h3><span class="saved-count" id="savedCount">0</span></div>
               <div class="saved-blocks" id="savedBlocks" aria-live="polite"></div>
               <div class="inventory-summary" id="inventorySummary"></div>
               <button class="clear-button" id="clearBlocks" type="button">Clear my list</button>
@@ -880,10 +891,11 @@
         buildProjects[activeBuildName] = buildBlocks;
         localStorage.setItem(projectsStorageKey, JSON.stringify(buildProjects));
         const blockNames = Object.keys(buildBlocks);
+        document.getElementById('savedCount').textContent = blockNames.length;
         document.getElementById('clearBlocks').hidden = blockNames.length === 0;
         renderInventorySummary();
         if (!blockNames.length) {
-          savedBlocks.innerHTML = '<p class="saved-empty">No blocks saved yet. Choose one to get started.</p>';
+          savedBlocks.innerHTML = '<p class="saved-empty"><span class="empty-icon" aria-hidden="true">+</span><span>No blocks saved yet. Choose one to get started.</span></p>';
           return;
         }
         blockNames.forEach((blockName) => {
