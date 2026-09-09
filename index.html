@@ -352,9 +352,17 @@
       .build-controls .button, .delete-build, .file-upload-label { min-height: 42px; display: inline-flex; align-items: center; }
       .file-upload-label:hover { border-color: var(--grass); color: var(--grass); }
       .file-chosen { max-width: 150px; overflow: hidden; color: var(--muted); font-size: 0.75rem; text-overflow: ellipsis; white-space: nowrap; }
+      .build-description { margin: 12px 0 0; color: var(--muted); font-size: 0.84rem; line-height: 1.45; }
+      .build-gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-top: 12px; }
+      .build-gallery[hidden] { display: none; }
+      .build-gallery img { width: 100%; height: 72px; object-fit: cover; border: 1px solid var(--line); border-radius: 6px; cursor: zoom-in; }
       .share-status { display: inline-block; color: var(--grass); font-size: 0.78rem; }
       .toast { position: fixed; right: 22px; bottom: 22px; z-index: 1200; max-width: 300px; padding: 12px 15px; color: #fff; background: var(--leaf-dark); border: 1px solid var(--lime); border-radius: 7px; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transform: translateY(12px); transition: opacity 0.25s ease, transform 0.25s ease; }
       .toast.visible { opacity: 1; transform: translateY(0); }
+      .lightbox { position: fixed; inset: 0; z-index: 1300; display: grid; place-items: center; padding: 28px; background: rgba(3, 12, 8, 0.82); backdrop-filter: blur(8px); }
+      .lightbox[hidden] { display: none; }
+      .lightbox img { max-width: min(900px, 94vw); max-height: 84vh; border: 2px solid rgba(255,255,255,0.7); border-radius: 8px; box-shadow: 0 18px 60px rgba(0,0,0,0.45); }
+      .lightbox-close { position: absolute; top: 20px; right: 24px; width: 42px; height: 42px; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; font-size: 1.5rem; }
 
       .delete-build {
         padding: 9px 10px;
@@ -402,6 +410,7 @@
       }
       .block-search { width: 100%; margin-bottom: 10px; padding: 11px 12px; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; font: inherit; }
       .block-search:focus { outline: 2px solid var(--lime); outline-offset: 1px; }
+      .block-option mark { padding: 0 2px; color: var(--ink); background: var(--lime); border-radius: 2px; }
 
       .category-button {
         padding: 6px 14px;
@@ -519,6 +528,7 @@
 
       .saved-item span:nth-child(2) { flex: 1; }
       .block-name { flex: 1; }
+      .recipe-note { grid-column: 2 / -1; margin: -3px 0 2px; color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
 
       .quantity-control {
         display: inline-flex;
@@ -593,6 +603,7 @@
         .control-row { width: 100%; }
         .control-row > * { flex: 1 1 180px; }
         .biome-gallery { grid-template-columns: repeat(2, 1fr); }
+        .build-gallery { grid-template-columns: repeat(2, 1fr); }
       }
       @media print {
         body { background: #fff; color: #111; }
@@ -670,6 +681,12 @@
                   <input id="newBuildName" type="text" placeholder="Name your build" maxlength="40" aria-label="Name your build" />
                   <button class="button primary" id="createBuild" type="button">Create Build</button>
                   <select id="buildSelect" aria-label="Choose a saved build"></select>
+                  <select id="templateSelect" aria-label="Load a starter template">
+                    <option value="">Load Starter Template</option>
+                    <option value="starter-house">Starter Survival House</option>
+                    <option value="nether-portal">Nether Portal Setup</option>
+                    <option value="crop-farm">Automatic Crop Farm</option>
+                  </select>
                 </div>
                 <div class="control-row secondary-actions">
                   <button class="delete-build" id="deleteBuild" type="button">Delete This Build</button>
@@ -682,6 +699,8 @@
                 <button class="button secondary" id="shareBuild" type="button" hidden>Share This Build</button>
                 <span class="share-status" id="shareStatus" role="status" aria-live="polite"></span>
               </div>
+              <p class="build-description" id="buildDescription"></p>
+              <div class="build-gallery" id="buildGallery" hidden aria-label="Uploaded build screenshots"></div>
             </div>
           </div>
           <div class="hub-grid">
@@ -716,6 +735,10 @@
       </div>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Screenshot preview">
+      <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Close screenshot preview">&times;</button>
+      <img id="lightboxImage" alt="Expanded build screenshot" />
+    </div>
     <script>
       // Theme toggle functionality
       const themeToggle = document.getElementById('themeToggle');
@@ -764,6 +787,23 @@
       let selectedBiome = buildBiomes[activeBuildName] || '';
       const screenshotStorageKey = 'blockcraft-build-screenshots';
       const buildScreenshots = JSON.parse(localStorage.getItem(screenshotStorageKey) || '{}');
+      const descriptionStorageKey = 'blockcraft-build-descriptions';
+      const buildDescriptions = JSON.parse(localStorage.getItem(descriptionStorageKey) || '{}');
+      let activeDescription = buildDescriptions[activeBuildName] || '';
+      const recipeBook = {
+        'Oak Stairs': { inputs: { 'Oak Planks': 3 }, output: 4 },
+        'Oak Slab': { inputs: { 'Oak Planks': 3 }, output: 6 },
+        'Stone Stairs': { inputs: { Stone: 6 }, output: 4 },
+        'Stone Slab': { inputs: { Stone: 3 }, output: 6 },
+        'Chest': { inputs: { 'Oak Planks': 8 }, output: 1 },
+        'Crafting Table': { inputs: { 'Oak Planks': 4 }, output: 1 },
+        'Glass Pane': { inputs: { Glass: 6 }, output: 16 }
+      };
+      const starterTemplates = {
+        'starter-house': { name: 'Starter Survival House', description: 'A warm first home with a sturdy stone base, spruce framing, and bright windows.', blocks: { 'Oak Planks': 128, Cobblestone: 96, Glass: 32, 'Oak Stairs': 32 } },
+        'nether-portal': { name: 'Nether Portal Setup', description: 'A compact portal station with room for storage, lighting, and a safe return path.', blocks: { Obsidian: 14, Stone: 64, Glowstone: 16, 'Stone Slab': 16 } },
+        'crop-farm': { name: 'Automatic Crop Farm', description: 'A practical farming build with a wood frame, water channels, and space to expand.', blocks: { 'Oak Planks': 64, Dirt: 128, Glass: 24, 'Oak Slab': 16 } }
+      };
       const biomeCatalog = [
         ['Plains', 'Open fields', '#9dcc72', '#d9ef9d'],
         ['Forest', 'Oak and birch', '#2d6b43', '#9dcf6b'],
@@ -863,10 +903,16 @@
         toastTimer = setTimeout(() => toast.classList.remove('visible'), 3000);
       }
 
+      function highlightBlockName(blockName) {
+        if (!blockSearchTerm) return blockName;
+        const escapedTerm = blockSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return blockName.replace(new RegExp(`(${escapedTerm})`, 'ig'), '<mark>$1</mark>');
+      }
+
       function renderPalette(category) {
         blockPalette.innerHTML = blockCatalog
           .filter(([blockCategory, blockName]) => (category === 'all' || blockCategory === category) && blockName.toLowerCase().includes(blockSearchTerm))
-          .map(([blockCategory, blockName, texture]) => `<button class="block-option" type="button" data-block="${blockName}" data-category="${blockCategory}"><img class="block-image" src="${textureBase}${resolveTexture(texture)}.png" alt="" />${blockName}</button>`)
+          .map(([blockCategory, blockName, texture]) => `<button class="block-option" type="button" data-block="${blockName}" data-category="${blockCategory}"><img class="block-image" src="${textureBase}${resolveTexture(texture)}.png" alt="" />${highlightBlockName(blockName)}</button>`)
           .join('');
       }
 
@@ -886,6 +932,24 @@
         document.getElementById('inventorySummary').innerHTML = `<strong>Storage estimate</strong><br />${details || 'Add blocks to calculate storage.'}<br /><strong>${totalBlocks} blocks = ${totalStacks} stacks</strong><br />${inventorySlots} inventory slots / ${chestLabel}`;
       }
 
+      function recipeMarkup(blockName, amount) {
+        const recipe = recipeBook[blockName];
+        if (!recipe) return '';
+        const inputs = Object.entries(recipe.inputs).map(([input, count]) => `${Math.ceil(amount / recipe.output) * count} ${input}`).join(', ');
+        return `<small class="recipe-note">Recipe needs: ${inputs}</small>`;
+      }
+
+      function renderBuildGallery() {
+        const gallery = document.getElementById('buildGallery');
+        const images = buildScreenshots[activeBuildName] || [];
+        gallery.hidden = images.length === 0;
+        gallery.innerHTML = images.map((image, index) => `<img src="${image}" alt="Screenshot ${index + 1} from ${activeBuildName}" data-screenshot="${image}" />`).join('');
+      }
+
+      function renderBuildDescription() {
+        document.getElementById('buildDescription').textContent = activeDescription;
+      }
+
       function renderBuildBlocks() {
         savedBlocks.innerHTML = '';
         buildProjects[activeBuildName] = buildBlocks;
@@ -894,6 +958,7 @@
         document.getElementById('savedCount').textContent = blockNames.length;
         document.getElementById('clearBlocks').hidden = blockNames.length === 0;
         renderInventorySummary();
+        renderBuildGallery();
         if (!blockNames.length) {
           savedBlocks.innerHTML = '<p class="saved-empty"><span class="empty-icon" aria-hidden="true">+</span><span>No blocks saved yet. Choose one to get started.</span></p>';
           return;
@@ -901,7 +966,7 @@
         blockNames.forEach((blockName) => {
           const item = document.createElement('div');
           item.className = 'saved-item';
-          item.innerHTML = `<img class="block-image" src="${textureBase}${getBlockTexture(blockName)}.png" alt="${blockName}" /><span class="block-name">${blockName}</span><span class="quantity-control"><button type="button" data-action="decrease" data-block="${blockName}" aria-label="Remove one ${blockName}">−</button><input class="quantity-input" type="number" min="1" step="1" value="${buildBlocks[blockName]}" data-block="${blockName}" aria-label="Amount of ${blockName}" /><button type="button" data-action="increase" data-block="${blockName}" aria-label="Add one ${blockName}">+</button></span><button class="delete-item-button" type="button" data-action="remove" data-block="${blockName}" aria-label="Remove ${blockName}">&times;</button>`;
+          item.innerHTML = `<img class="block-image" src="${textureBase}${getBlockTexture(blockName)}.png" alt="${blockName}" /><span class="block-name">${blockName}</span><span class="quantity-control"><button type="button" data-action="decrease" data-block="${blockName}" aria-label="Remove one ${blockName}">−</button><input class="quantity-input" type="number" min="1" step="1" value="${buildBlocks[blockName]}" data-block="${blockName}" aria-label="Amount of ${blockName}" /><button type="button" data-action="increase" data-block="${blockName}" aria-label="Add one ${blockName}">+</button></span><button class="delete-item-button" type="button" data-action="remove" data-block="${blockName}" aria-label="Remove ${blockName}">&times;</button>${recipeMarkup(blockName, buildBlocks[blockName])}`;
           savedBlocks.appendChild(item);
         });
       }
@@ -979,8 +1044,11 @@
         activeBuildName = buildName;
         buildBlocks = buildProjects[activeBuildName];
         selectedBiome = '';
+        activeDescription = '';
+        buildDescriptions[activeBuildName] = '';
         nameInput.value = '';
         renderBuildChoices();
+        renderBuildDescription();
         renderBiomeGallery();
         renderBuildBlocks();
       });
@@ -989,11 +1057,26 @@
         if (event.key === 'Enter') document.getElementById('createBuild').click();
       });
 
+      document.getElementById('templateSelect').addEventListener('change', (event) => {
+        const template = starterTemplates[event.target.value];
+        if (!template) return;
+        buildBlocks = { ...template.blocks };
+        activeDescription = template.description;
+        buildDescriptions[activeBuildName] = activeDescription;
+        localStorage.setItem(descriptionStorageKey, JSON.stringify(buildDescriptions));
+        renderBuildDescription();
+        renderBuildBlocks();
+        event.target.value = '';
+        showToast(`${template.name} loaded.`);
+      });
+
       buildSelect.addEventListener('change', () => {
         activeBuildName = buildSelect.value;
         buildBlocks = buildProjects[activeBuildName];
         selectedBiome = buildBiomes[activeBuildName] || '';
+        activeDescription = buildDescriptions[activeBuildName] || '';
         renderBiomeGallery();
+        renderBuildDescription();
         renderBuildBlocks();
       });
 
@@ -1003,6 +1086,7 @@
         delete buildProjects[activeBuildName];
         delete buildBiomes[activeBuildName];
         delete buildScreenshots[activeBuildName];
+        delete buildDescriptions[activeBuildName];
         const remainingBuilds = Object.keys(buildProjects);
         if (!remainingBuilds.length) buildProjects['My First Build'] = {};
         activeBuildName = Object.keys(buildProjects)[0];
@@ -1011,7 +1095,9 @@
         localStorage.setItem(projectsStorageKey, JSON.stringify(buildProjects));
         localStorage.setItem(biomeStorageKey, JSON.stringify(buildBiomes));
         localStorage.setItem(screenshotStorageKey, JSON.stringify(buildScreenshots));
+        localStorage.setItem(descriptionStorageKey, JSON.stringify(buildDescriptions));
         renderBuildChoices();
+        renderBuildDescription();
         renderBiomeGallery();
         renderBuildBlocks();
       });
@@ -1027,10 +1113,21 @@
         }))).then((images) => {
           buildScreenshots[activeBuildName] = images;
           localStorage.setItem(screenshotStorageKey, JSON.stringify(buildScreenshots));
+          renderBuildGallery();
           renderBiomeGallery();
           event.target.value = '';
         });
       });
+
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightboxImage');
+      document.getElementById('buildGallery').addEventListener('click', (event) => {
+        const image = event.target.closest('[data-screenshot]');
+        if (!image) return;
+        lightboxImage.src = image.dataset.screenshot;
+        lightbox.hidden = false;
+      });
+      document.getElementById('lightboxClose').addEventListener('click', () => { lightbox.hidden = true; });
 
       document.getElementById('shareBuild').addEventListener('click', async () => {
         const materials = Object.entries(buildBlocks).map(([blockName, amount]) => `${blockName}: ${amount}`).join(', ') || 'No materials added yet';
@@ -1092,6 +1189,10 @@
 
       document.addEventListener('keydown', (event) => {
         if (event.key !== 'Escape') return;
+        if (!lightbox.hidden) {
+          lightbox.hidden = true;
+          return;
+        }
         const gallery = document.getElementById('biomeGallery');
         if (!gallery.hidden) {
           gallery.hidden = true;
@@ -1105,7 +1206,9 @@
 
       renderPalette('all');
       renderBuildChoices();
+      renderBuildDescription();
       renderBiomeGallery();
+      renderBuildGallery();
       renderBuildBlocks();
     </script>
   </body>
