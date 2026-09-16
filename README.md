@@ -21,3 +21,7 @@ I built this project for Minecraft builders who enjoy ambitious creations but ne
 [Visit BlockCraft Companion](https://cohaywoo.github.io/cmpa-4303-semester-project/)
 
 The source code is available in the [GitHub repository](https://github.com/cohaywoo/cmpa-4303-semester-project).
+
+## Exercise 05 enhancement
+
+The Build Hub now includes a persistent materials checklist and gathering progress bar. Builders can mark each saved material as collected, see the percentage completed for the active build, and resume that progress after switching builds or returning to the site. I chose this enhancement because the original planner could calculate what materials were needed but could not help track what had already been gathered. I implemented it with HTML, CSS, vanilla JavaScript, and localStorage, improving the P01 project from a planning list into a more useful build-progress tool.

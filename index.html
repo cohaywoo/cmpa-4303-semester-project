@@ -511,6 +511,9 @@
       .empty-icon { display: grid; place-items: center; width: 28px; height: 28px; color: var(--grass); background: rgba(110, 203, 99, 0.12); border: 1px solid rgba(110, 203, 99, 0.3); border-radius: 50%; font-size: 0.85rem; }
       .inventory-summary { margin: 15px 0; padding: 12px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; font-size: 0.8rem; line-height: 1.5; }
       .inventory-summary strong { color: var(--gold); }
+      .progress-track { height: 8px; margin: 10px 0 4px; overflow: hidden; background: rgba(255, 255, 255, 0.14); border-radius: 999px; }
+      .progress-bar { height: 100%; width: 0; background: var(--grass); border-radius: inherit; transition: width 0.25s ease; }
+      .progress-label { display: block; color: var(--muted); font-size: 0.75rem; }
       .export-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
       .export-actions .button { padding: 8px 10px; font-size: 0.78rem; }
       .export-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
@@ -527,6 +530,9 @@
       }
 
       .saved-item span:nth-child(2) { flex: 1; }
+      .saved-item.collected { opacity: 0.62; }
+      .saved-item.collected .block-name { color: var(--muted); text-decoration: line-through; }
+      .collected-check { width: 17px; height: 17px; accent-color: var(--grass); cursor: pointer; }
       .block-name { flex: 1; }
       .recipe-note { grid-column: 2 / -1; margin: -3px 0 2px; color: var(--muted); font-size: 0.72rem; line-height: 1.35; }
 
@@ -789,6 +795,8 @@
       const buildScreenshots = JSON.parse(localStorage.getItem(screenshotStorageKey) || '{}');
       const descriptionStorageKey = 'blockcraft-build-descriptions';
       const buildDescriptions = JSON.parse(localStorage.getItem(descriptionStorageKey) || '{}');
+      const collectedStorageKey = 'blockcraft-build-collected';
+      const collectedBlocks = JSON.parse(localStorage.getItem(collectedStorageKey) || '{}');
       let activeDescription = buildDescriptions[activeBuildName] || '';
       const recipeBook = {
         'Oak Stairs': { inputs: { 'Oak Planks': 3 }, output: 4 },
@@ -924,12 +932,15 @@
       function renderInventorySummary() {
         const blockNames = Object.keys(buildBlocks);
         const totalBlocks = blockNames.reduce((total, blockName) => total + buildBlocks[blockName], 0);
+        const collected = collectedBlocks[activeBuildName] || {};
+        const collectedCount = blockNames.filter((blockName) => collected[blockName]).length;
+        const progress = blockNames.length ? Math.round((collectedCount / blockNames.length) * 100) : 0;
         const totalStacks = Math.ceil(totalBlocks / 64);
         const inventorySlots = blockNames.reduce((slots, blockName) => slots + Math.ceil(buildBlocks[blockName] / 64), 0);
         const chestCount = Math.ceil(inventorySlots / 27);
         const chestLabel = chestCount === 1 ? '1 Single Chest' : `${chestCount} Chests`;
         const details = blockNames.map((blockName) => `${blockName}: ${buildBlocks[blockName]} blocks = ${Math.ceil(buildBlocks[blockName] / 64)} stack${Math.ceil(buildBlocks[blockName] / 64) === 1 ? '' : 's'}`).join('<br />');
-        document.getElementById('inventorySummary').innerHTML = `<strong>Storage estimate</strong><br />${details || 'Add blocks to calculate storage.'}<br /><strong>${totalBlocks} blocks = ${totalStacks} stacks</strong><br />${inventorySlots} inventory slots / ${chestLabel}`;
+        document.getElementById('inventorySummary').innerHTML = `<strong>Gathering progress</strong><div class="progress-track" role="progressbar" aria-label="Materials gathered" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><div class="progress-bar" style="width: ${progress}%"></div></div><span class="progress-label">${collectedCount} of ${blockNames.length} materials collected (${progress}%)</span><br /><strong>Storage estimate</strong><br />${details || 'Add blocks to calculate storage.'}<br /><strong>${totalBlocks} blocks = ${totalStacks} stacks</strong><br />${inventorySlots} inventory slots / ${chestLabel}`;
       }
 
       function recipeMarkup(blockName, amount) {
@@ -965,8 +976,9 @@
         }
         blockNames.forEach((blockName) => {
           const item = document.createElement('div');
-          item.className = 'saved-item';
-          item.innerHTML = `<img class="block-image" src="${textureBase}${getBlockTexture(blockName)}.png" alt="${blockName}" /><span class="block-name">${blockName}</span><span class="quantity-control"><button type="button" data-action="decrease" data-block="${blockName}" aria-label="Remove one ${blockName}">−</button><input class="quantity-input" type="number" min="1" step="1" value="${buildBlocks[blockName]}" data-block="${blockName}" aria-label="Amount of ${blockName}" /><button type="button" data-action="increase" data-block="${blockName}" aria-label="Add one ${blockName}">+</button></span><button class="delete-item-button" type="button" data-action="remove" data-block="${blockName}" aria-label="Remove ${blockName}">&times;</button>${recipeMarkup(blockName, buildBlocks[blockName])}`;
+          const isCollected = Boolean((collectedBlocks[activeBuildName] || {})[blockName]);
+          item.className = `saved-item${isCollected ? ' collected' : ''}`;
+          item.innerHTML = `<input class="collected-check" type="checkbox" data-action="collect" data-block="${blockName}" ${isCollected ? 'checked' : ''} aria-label="Mark ${blockName} as collected" /><img class="block-image" src="${textureBase}${getBlockTexture(blockName)}.png" alt="${blockName}" /><span class="block-name">${blockName}</span><span class="quantity-control"><button type="button" data-action="decrease" data-block="${blockName}" aria-label="Remove one ${blockName}">−</button><input class="quantity-input" type="number" min="1" step="1" value="${buildBlocks[blockName]}" data-block="${blockName}" aria-label="Amount of ${blockName}" /><button type="button" data-action="increase" data-block="${blockName}" aria-label="Add one ${blockName}">+</button></span><button class="delete-item-button" type="button" data-action="remove" data-block="${blockName}" aria-label="Remove ${blockName}">&times;</button>${recipeMarkup(blockName, buildBlocks[blockName])}`;
           savedBlocks.appendChild(item);
         });
       }
@@ -1013,13 +1025,24 @@
         const button = event.target.closest('[data-action]');
         if (!button) return;
         const blockName = button.dataset.block;
+        if (button.dataset.action === 'collect') return;
         if (button.dataset.action === 'remove') {
           delete buildBlocks[blockName];
+          if (collectedBlocks[activeBuildName]) delete collectedBlocks[activeBuildName][blockName];
+          localStorage.setItem(collectedStorageKey, JSON.stringify(collectedBlocks));
           renderBuildBlocks();
           return;
         }
         buildBlocks[blockName] += button.dataset.action === 'increase' ? 1 : -1;
         if (buildBlocks[blockName] <= 0) delete buildBlocks[blockName];
+        renderBuildBlocks();
+      });
+
+      savedBlocks.addEventListener('change', (event) => {
+        if (!event.target.matches('.collected-check')) return;
+        collectedBlocks[activeBuildName] = collectedBlocks[activeBuildName] || {};
+        collectedBlocks[activeBuildName][event.target.dataset.block] = event.target.checked;
+        localStorage.setItem(collectedStorageKey, JSON.stringify(collectedBlocks));
         renderBuildBlocks();
       });
 
@@ -1033,6 +1056,8 @@
 
       document.getElementById('clearBlocks').addEventListener('click', () => {
         buildBlocks = {};
+        collectedBlocks[activeBuildName] = {};
+        localStorage.setItem(collectedStorageKey, JSON.stringify(collectedBlocks));
         renderBuildBlocks();
       });
 
@@ -1087,6 +1112,7 @@
         delete buildBiomes[activeBuildName];
         delete buildScreenshots[activeBuildName];
         delete buildDescriptions[activeBuildName];
+        delete collectedBlocks[activeBuildName];
         const remainingBuilds = Object.keys(buildProjects);
         if (!remainingBuilds.length) buildProjects['My First Build'] = {};
         activeBuildName = Object.keys(buildProjects)[0];
@@ -1096,6 +1122,7 @@
         localStorage.setItem(biomeStorageKey, JSON.stringify(buildBiomes));
         localStorage.setItem(screenshotStorageKey, JSON.stringify(buildScreenshots));
         localStorage.setItem(descriptionStorageKey, JSON.stringify(buildDescriptions));
+        localStorage.setItem(collectedStorageKey, JSON.stringify(collectedBlocks));
         renderBuildChoices();
         renderBuildDescription();
         renderBiomeGallery();
